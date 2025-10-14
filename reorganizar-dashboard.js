@@ -3,11 +3,14 @@
    * ============================================
    * 🚀 Snippet utilitário de reorganização visual
    * Autor: israel elias
+   * Versão: 2.0
    * Compatível com: Edge / Chrome / Firefox
    * ============================================
    * 
-   * CORREÇÃO: Move elementos completos (preservando eventos)
-   * ao invés de apenas copiar innerHTML
+   * ATUALIZAÇÃO v2.0:
+   * - Adicionado suporte para listas de ocorrências
+   * - CSS otimizado para .open-list, .attendance-list, .hold-list
+   * - Preservação de eventos e elementos DOM
    */
 
   /** --------------------------
@@ -22,13 +25,6 @@
       '.section.priorities-section',
       '.content-right-top'
     ],
-
-    // Mapeamento de classes antigas → novas
-    classMapping: {
-      'content-left': 'content-right',
-      'content-center-top': 'content-left',
-      'content-right': 'content-center-top'
-    },
 
     // CSS adicional que será injetado
     customCSS: `
@@ -59,6 +55,31 @@
         bottom: 0;
         right: 0;
         width: calc(100% - 630px);
+      }
+
+      /* Listas de ocorrências - Layout otimizado */
+      .occurrence-list.open-list {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 212px;
+        width: 207px;
+      }
+
+      .occurrence-list.attendance-list {
+        position: relative;
+        top: 0;
+        right: 0;
+        width: 207px;
+        height: 49.5%;
+      }
+
+      .occurrence-list.hold-list {
+        position: relative;
+        bottom: 0;
+        right: 0;
+        width: 207px;
+        height: 49.5%;
       }
     `
   };
@@ -96,22 +117,6 @@
   };
 
   /**
-   * Move fisicamente o elemento no DOM (preserva eventos)
-   * @param {HTMLElement} element - Elemento a ser movido
-   * @param {HTMLElement} targetParent - Novo pai
-   * @param {HTMLElement} referenceNode - Nó de referência para inserção
-   */
-  const moveElement = (element, targetParent, referenceNode = null) => {
-    if (!element || !targetParent) return;
-    
-    if (referenceNode) {
-      targetParent.insertBefore(element, referenceNode);
-    } else {
-      targetParent.appendChild(element);
-    }
-  };
-
-  /**
    * Oculta ou remove elementos do DOM
    */
   const hideOrRemoveElements = () => {
@@ -146,6 +151,29 @@
     style.textContent = config.customCSS.trim();
     document.head.appendChild(style);
     console.log('🎨 CSS personalizado injetado.');
+  };
+
+  /**
+   * Valida a presença das listas de ocorrências
+   */
+  const validateOccurrenceLists = () => {
+    const lists = {
+      open: $('.occurrence-list.open-list'),
+      attendance: $('.occurrence-list.attendance-list'),
+      hold: $('.occurrence-list.hold-list')
+    };
+
+    const found = Object.entries(lists)
+      .filter(([, el]) => el !== null)
+      .map(([name]) => name);
+
+    if (found.length > 0) {
+      console.log(`📋 Listas de ocorrências encontradas: ${found.join(', ')}`);
+    } else {
+      console.log('ℹ️ Nenhuma lista de ocorrências detectada.');
+    }
+
+    return lists;
   };
 
   /**
@@ -211,14 +239,20 @@
    * 🧠 EXECUÇÃO PRINCIPAL
    * ---------------------------*/
   const main = () => {
-    console.log('🚀 Iniciando reorganização do dashboard...');
+    console.log('🚀 Iniciando reorganização do dashboard v2.0...');
+    console.log('📦 Configurações:', {
+      removeElements: config.removeElements,
+      selectorsToHide: config.selectorsToHideOrRemove
+    });
 
     const success = reorganizeDashboard();
     
     if (success) {
       hideOrRemoveElements();
       injectCustomCSS();
+      validateOccurrenceLists();
       console.log('✨ Script executado com sucesso!');
+      console.log('💡 Dica: Execute "restaurarDashboard()" no console para desfazer.');
     } else {
       console.error('⚠️ Falha na reorganização.');
     }
@@ -237,7 +271,6 @@
    * ---------------------------*/
   try {
     main();
-    console.log('💡 Dica: Execute "restaurarDashboard()" no console para desfazer.');
   } catch (err) {
     console.error('⚠️ Erro ao executar o snippet:', err);
   }
