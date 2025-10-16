@@ -177,6 +177,44 @@
   };
 
   /**
+   * Reorganiza as listas de ocorrências
+   * Nova ordem: open-list → hold-list → attendance-list
+   */
+  const reorderOccurrenceLists = () => {
+    console.log('🔀 Reorganizando ordem das listas de ocorrências...');
+
+    const openList = $('.occurrence-list.open-list');
+    const attendanceList = $('.occurrence-list.attendance-list');
+    const holdList = $('.occurrence-list.hold-list');
+
+    // Verifica se todas as listas existem
+    if (!openList || !attendanceList || !holdList) {
+      console.log('⚠️ Nem todas as listas de ocorrências foram encontradas. Pulando reordenação.');
+      return false;
+    }
+
+    // Pega o container pai (deve ser content-center-top após a reorganização)
+    const container = openList.parentElement;
+    
+    if (!container) {
+      console.error('❌ Container das listas não encontrado.');
+      return false;
+    }
+
+    // Remove as listas do DOM temporariamente
+    const lists = [openList, holdList, attendanceList];
+    lists.forEach(list => list.remove());
+
+    // Reinsere na ordem correta: open → hold → attendance
+    container.appendChild(openList);
+    container.appendChild(holdList);
+    container.appendChild(attendanceList);
+
+    console.log('✅ Listas reordenadas: open-list → hold-list → attendance-list');
+    return true;
+  };
+
+  /**
    * Reorganiza os elementos do dashboard
    * Move elementos completos (não apenas innerHTML)
    */
@@ -251,6 +289,10 @@
       hideOrRemoveElements();
       injectCustomCSS();
       validateOccurrenceLists();
+      
+      // Reordena as listas de ocorrências após a reorganização dos painéis
+      reorderOccurrenceLists();
+      
       console.log('✨ Script executado com sucesso!');
       console.log('💡 Dica: Execute "restaurarDashboard()" no console para desfazer.');
     } else {
